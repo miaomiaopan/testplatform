@@ -3,7 +3,6 @@ package testplatform.controller;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import testplatform.entity.Api;
 import testplatform.entity.Api.PROTOCOL;
 import testplatform.repository.ApiRepository;
+import testplatform.util.HttpUtil;
 
 /**
  * @author panmiaomiao
@@ -32,17 +32,17 @@ public class ApiController {
 	@Autowired
 	private ApiRepository apiRepository;
 
-	@RequestMapping(value = "/test", method = RequestMethod.GET)
-	public @ResponseBody Long test() {
-		Api api = new Api();
-		api.setName("测试");
-		api.setProtocol(PROTOCOL.HTTP);
-		api.setDomain("https://api-qa3.yonghuivip.com");
-		api.setUri("/api/member/signIn");
-		api.setBodyParams("{\"phoneNum\":\"string\",\"securityCode\":\"string\"}");
-		api = apiRepository.save(api);
-		return api.getId();
-	}
+//	@RequestMapping(value = "/test", method = RequestMethod.GET)
+//	public @ResponseBody Long test() {
+//		Api api = new Api();
+//		api.setName("测试");
+//		api.setProtocol(PROTOCOL.HTTP);
+//		api.setDomain("https://api-qa3.yonghuivip.com");
+//		api.setUri("/api/member/signIn");
+//		api.setBodyParams("{\"phoneNum\":\"string\",\"securityCode\":\"string\"}");
+//		api = apiRepository.save(api);
+//		return api.getId();
+//	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
 	public String search(Api api, Model model, Pageable pageable) {
@@ -66,6 +66,8 @@ public class ApiController {
 			api.setCreateTime(date);
 			api = apiRepository.save(api);
 		} else {
+			Api temp = apiRepository.findById(id).get();
+			api.setCreateTime(temp.getCreateTime());
 			api.setUpdateTime(date);
 			api = apiRepository.saveAndFlush(api);
 		}
@@ -78,8 +80,8 @@ public class ApiController {
 		if (id == null) {
 			throw new Exception("id不能为空");
 		}
-		Optional<Api> optionalApi = apiRepository.findById(id);
-		return optionalApi.get();
+		Api api = apiRepository.findById(id).get();
+		return api;
 	}
 
 	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
@@ -91,10 +93,20 @@ public class ApiController {
 	}
 
 	@RequestMapping(value = "/test/{id}", method = RequestMethod.GET)
-	public @ResponseBody void test(@PathVariable Long id, Model model) throws Exception {
-		if (id == null) {
+	public @ResponseBody String test(@PathVariable Long id, Model model) throws Exception {
+		if(id == null){
 			throw new Exception("id不能为空");
 		}
-		System.out.println("测试成功");
+		Api api = apiRepository.findById(id).get();
+		String url = null;
+		PROTOCOL protocol = api.getProtocol();
+		if(protocol.equals(PROTOCOL.HTTP)){
+			url = "http";
+		}else if(protocol.equals(PROTOCOL.HTTPS)){
+			url = "https";
+		}
+		url += "://"+api.getDomain()+api.getUri()+"?"+api.getParams();
+		String resppnse = HttpUtil.post(url, api.getBodyParams());
+		return resppnse;
 	}
 }
