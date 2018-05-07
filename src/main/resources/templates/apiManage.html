@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+<title>Dashboard Template for Bootstrap</title>
+<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="../js/jquery.serializejson.min.js"></script>
+<script type="text/javascript"
+	src="../js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap-paginator.min.js"></script>
+<link href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script>
+	function edit(id) {
+		$("#saveForm")[0].reset();
+		$("#modal").modal("show");
+		if (id != null) {
+			$.get("/api/get/" + id, id, function(data) {
+				console.info(data);
+				$("#id").val(data.id);
+				$("#name").val(data.name);
+				$("#protocol").val(data.protocol);
+				$("#domain").val(data.domain);
+				$("#uri").val(data.uri);
+				$("#params").val(data.params);
+				$("#bodyParams").val(data.bodyParams);
+			});
+		}
+	}
+
+	function save() {
+		//表单数据转换为json字符串
+		var formDataJson = JSON.stringify($('#saveForm').serializeJSON());
+		console.info(formDataJson);
+		$.ajax({
+			url : "/api/save",
+			type : "POST",
+			datType : "JSON",
+			contentType : "application/json",
+			data : formDataJson,
+			success : function(result) {
+				console.info(result);
+				$("#modal").modal("hide");
+				window.location.href = ("/api/search");
+			}
+		});
+	}
+
+	function test(id) {
+		$.get("/api/test/" + id, function(data) {
+			console.info(data);
+		});
+	}
+
+	function deleteApi(id) {
+		$.get("/api/delete/" + id, id, function(data) {
+			console.info(data);
+			window.location.href = ("/api/search");
+		});
+	}
+
+	function search() {
+		//表单数据转换为json字符串
+		var formDataJson = JSON.stringify($('#searchForm').serializeJSON());
+		console.info(formDataJson);
+		$.ajax({
+			url : "/api/search",
+			type : "GET",
+			datType : "JSON",
+			contentType : "application/json",
+			data : formDataJson,
+			success : function(result) {
+				console.info(result);
+				window.location.href = ("/api/search");
+			}
+		});
+	}
+
+	$(document).ready(function() {
+		$('#pagination').bootstrapPaginator({
+			currentPage : [[${page.currentPage}]],//当前的请求页面。
+			totalPages : [[${page.totalPages}]],//一共多少页。
+			size : "normal",
+			bootstrapMajorVersion : 3,//bootstrap的版本要求。
+			alignment : "right",
+			numberOfPages : 10,//一页列出多少数据。
+			itemTexts : function(type, page, current) {
+				switch (type) {
+				case "first":
+					return "首页";
+				case "prev":
+					return "上一页";
+				case "next":
+					return "下一页";
+				case "last":
+					return "末页";
+				case "page":
+					return page;
+				}
+			},
+			onPageClicked : function(event, originalEvent, type, page){
+				$("#page").val(page);
+				$("#searchForm").submit();
+			}
+		});
+	});
+</script>
+</head>
+<body>
+	<nav class="navbar navbar-inverse ">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">API测试平台</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#">Dashboard</a></li>
+					<li><a href="#">Settings</a></li>
+					<li><a href="#">Profile</a></li>
+					<li><a href="#">Help</a></li>
+				</ul>
+				<form class="navbar-form navbar-right">
+					<input type="text" class="form-control" placeholder="Search...">
+				</form>
+			</div>
+		</div>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-2">
+				<ul class="nav nav-pills nav-stacked">
+					<li role="presentation"><a href="/main">首页</a></li>
+					<li role="presentation"><a href="/case/search">用例</a></li>
+					<li role="presentation" class="active"><a href="/api/search">接口</a></li>
+				</ul>
+			</div>
+			<div class="col-md-10">
+				<!-- 搜索表单 -->
+				<form class="form-inline" id="searchForm" action="/api/search"
+					method="get">
+					<div class="form-group">
+						<label for="exampleInputName2">name</label> <input type="text"
+							class="form-control" id="searchName" name="name"
+							placeholder="name">
+					</div>
+					<div class="form-group">
+						<label for="exampleInputEmail2">uri</label> <input type="text"
+							class="form-control" id="searchUri" name="uri" placeholder="uri">
+					</div>
+					<input type="hidden" name="page" id="page" value="" />
+					<button type="submit" class="btn btn-primary">查询</button>
+					<button type="button" class="btn btn-info" onclick="edit()">添加接口</button>
+				</form>
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>名称</th>
+							<th>协议</th>
+							<th>域名</th>
+							<th>URI</th>
+							<th>params</th>
+							<th>bodyParams</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="api : ${apiArr}">
+							<td th:text="${api.id}"></td>
+							<td th:text="${api.name}"></td>
+							<td th:text="${api.protocol}"></td>
+							<td th:text="${api.domain}"></td>
+							<td th:text="${api.uri}"></td>
+							<td th:text="${api.params}"></td>
+							<td th:text="${api.bodyParams}"></td>
+							<td><a id="edit"
+								th:onclick="'javascript:edit(\''+${api.id}+'\')'">编辑</a> <a
+								id="test" th:onclick="'javascript:test(\''+${api.id}+'\')'">测试</a>
+								<a id="delete"
+								th:onclick="'javascript:deleteApi(\''+${api.id}+'\')'">删除</a></td>
+						</tr>
+					</tbody>
+				</table>
+				<!-- 分页 -->
+				<ul id="pagination" class="pagination">
+					<li class="disabled"><a href="#">&laquo;</a></li>
+					<li class="disabled"><a href="#">&raquo;</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">编辑</h4>
+				</div>
+				<div class="modal-body">
+					<form id="saveForm">
+						<div class="form-group">
+							<input type="hidden" class="form-control" id="id" name="id"
+								placeholder="id">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputEmail1">名称</label> <input type="text"
+								class="form-control" id="name" name="name" placeholder="name">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputPassword1">协议</label> <select type="text"
+								class="form-control" id="protocol" name="protocol"
+								placeholder="protocol">
+								<option value="HTTP">http</option>
+								<option value="HTTPS">https</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">域名</label> <input type="text"
+								class="form-control" id="domain" name="domain"
+								placeholder="domain">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">URI</label> <input type="text"
+								class="form-control" id="uri" name="uri" placeholder="uri">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">params</label>
+							<textarea class="form-control" id="params" name="params"
+								placeholder="params"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">bodyParams</label>
+							<textarea type="text" class="form-control" id="bodyParams"
+								name="bodyParams" placeholder="bodyParams"></textarea>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">关闭</button>
+							<button type="button" class="btn btn-primary" onclick="save()">保存</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
