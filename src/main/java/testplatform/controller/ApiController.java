@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import testplatform.entity.Api;
+import testplatform.entity.Api.METHOD;
 import testplatform.entity.Api.PROTOCOL;
 import testplatform.repository.ApiRepository;
 import testplatform.util.HttpUtil;
@@ -106,7 +107,13 @@ public class ApiController {
 			url = "https";
 		}
 		url += "://"+api.getDomain()+api.getUri()+"?"+api.getParams();
-		String resppnse = HttpUtil.post(url, api.getBodyParams());
+		METHOD method = api.getMethod();
+		String resppnse = null;
+		if(method.equals(METHOD.GET)){
+			resppnse = HttpUtil.get(url);
+		}else if(method.equals(METHOD.POST)){
+			resppnse = HttpUtil.post(url, api.getBodyParams());
+		}
 		return resppnse;
 	}
 }

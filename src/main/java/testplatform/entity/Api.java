@@ -15,6 +15,10 @@ public class Api extends Base {
 		HTTP, HTTPS
 	}
 
+	public enum METHOD {
+		POST, GET
+	}
+
 	private String name;
 	// 协议
 	private PROTOCOL protocol;
@@ -23,6 +27,7 @@ public class Api extends Base {
 	private String uri;
 	private String params;
 	private String bodyParams;
+	private METHOD method;
 
 	public PROTOCOL getProtocol() {
 		return protocol;
@@ -70,6 +75,14 @@ public class Api extends Base {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public METHOD getMethod() {
+		return method;
+	}
+
+	public void setMethod(METHOD method) {
+		this.method = method;
 	}
 
 }
