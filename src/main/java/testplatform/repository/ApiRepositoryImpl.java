@@ -40,8 +40,8 @@ public class ApiRepositoryImpl implements ApiRepositoryCustom {
 					expressions.add(criteriaBuilder.like(root.<String>get("name"), temp));
 				}
 
-				// uri
-				temp = entity.getUri();
+				// path
+				temp = entity.getPath();
 				if (null != entity && !StringUtils.isEmpty(temp)) {
 					expressions.add(criteriaBuilder.like(root.<String>get("uri"), temp));
 				}

@@ -17,10 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import testplatform.entity.Api;
-import testplatform.entity.Api.METHOD;
-import testplatform.entity.Api.PROTOCOL;
+import testplatform.entity.StepResult;
 import testplatform.repository.ApiRepository;
-import testplatform.util.HttpUtil;
+import testplatform.util.ApiExcutor;
 
 /**
  * @author panmiaomiao
@@ -32,18 +31,6 @@ import testplatform.util.HttpUtil;
 public class ApiController {
 	@Autowired
 	private ApiRepository apiRepository;
-
-//	@RequestMapping(value = "/test", method = RequestMethod.GET)
-//	public @ResponseBody Long test() {
-//		Api api = new Api();
-//		api.setName("测试");
-//		api.setProtocol(PROTOCOL.HTTP);
-//		api.setDomain("https://api-qa3.yonghuivip.com");
-//		api.setUri("/api/member/signIn");
-//		api.setBodyParams("{\"phoneNum\":\"string\",\"securityCode\":\"string\"}");
-//		api = apiRepository.save(api);
-//		return api.getId();
-//	}
 
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
 	public String search(Api api, Model model, Pageable pageable) {
@@ -78,42 +65,19 @@ public class ApiController {
 
 	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
 	public @ResponseBody Api get(@PathVariable Long id, Model model) throws Exception {
-		if (id == null) {
-			throw new Exception("id不能为空");
-		}
 		Api api = apiRepository.findById(id).get();
 		return api;
 	}
 
 	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
 	public @ResponseBody void delete(@PathVariable Long id, Model model) throws Exception {
-		if (id == null) {
-			throw new Exception("id不能为空");
-		}
 		apiRepository.deleteById(id);
 	}
 
 	@RequestMapping(value = "/test/{id}", method = RequestMethod.GET)
-	public @ResponseBody String test(@PathVariable Long id, Model model) throws Exception {
-		if(id == null){
-			throw new Exception("id不能为空");
-		}
+	public @ResponseBody StepResult test(@PathVariable Long id, Model model) throws Exception {
 		Api api = apiRepository.findById(id).get();
-		String url = null;
-		PROTOCOL protocol = api.getProtocol();
-		if(protocol.equals(PROTOCOL.HTTP)){
-			url = "http";
-		}else if(protocol.equals(PROTOCOL.HTTPS)){
-			url = "https";
-		}
-		url += "://"+api.getDomain()+api.getUri()+"?"+api.getParams();
-		METHOD method = api.getMethod();
-		String resppnse = null;
-		if(method.equals(METHOD.GET)){
-			resppnse = HttpUtil.get(url);
-		}else if(method.equals(METHOD.POST)){
-			resppnse = HttpUtil.post(url, api.getBodyParams());
-		}
-		return resppnse;
+		StepResult stepResult = ApiExcutor.excutor(api);
+		return stepResult;
 	}
 }

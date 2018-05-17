@@ -9,5 +9,5 @@ import testplatform.entity.TestCase;
  *
  * @date 2018年5月3日
  */
-public interface CaseRepository extends JpaRepository<TestCase, Long> {
+public interface TestCaseRepository extends JpaRepository<TestCase, Long> {
 }

@@ -1,6 +1,11 @@
 package testplatform.entity;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 
 /**
  * @author panmiaomiao
@@ -24,10 +29,15 @@ public class Api extends Base {
 	private PROTOCOL protocol;
 	// 域名
 	private String domain;
-	private String uri;
+	private String path;
 	private String params;
+	// TODO 扩展body参数
 	private String bodyParams;
 	private METHOD method;
+	private String validateStr;
+	@OneToMany(cascade=CascadeType.ALL) 
+	@JoinColumn(name="apiId")  
+	private List<Header> headers;
 
 	public PROTOCOL getProtocol() {
 		return protocol;
@@ -45,12 +55,12 @@ public class Api extends Base {
 		this.domain = domain;
 	}
 
-	public String getUri() {
-		return uri;
+	public String getPath() {
+		return path;
 	}
 
-	public void setUri(String uri) {
-		this.uri = uri;
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 	public String getParams() {
@@ -83,6 +93,22 @@ public class Api extends Base {
 
 	public void setMethod(METHOD method) {
 		this.method = method;
+	}
+
+	public String getValidateStr() {
+		return validateStr;
+	}
+
+	public void setValidateStr(String validateStr) {
+		this.validateStr = validateStr;
+	}
+
+	public List<Header> getHeaders() {
+		return headers;
+	}
+
+	public void setHeaders(List<Header> headers) {
+		this.headers = headers;
 	}
 
 }

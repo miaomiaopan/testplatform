@@ -27,7 +27,7 @@
 				$("#name").val(data.name);
 				$("#protocol").val(data.protocol);
 				$("#domain").val(data.domain);
-				$("#uri").val(data.uri);
+				$("#path").val(data.path);
 				$("#method").val(data.method);
 				$("#params").val(data.params);
 				$("#bodyParams").val(data.bodyParams);
@@ -57,7 +57,7 @@
 		$.get("/api/test/" + id, function(data) {
 			console.info(data);
 			$("#testResultModel").modal("show");
-			$("#testResult").text(data);
+			$("#testResult").text(data.response);
 		});
 	}
 
@@ -153,8 +153,8 @@
 							placeholder="name">
 					</div>
 					<div class="form-group">
-						<label for="exampleInputEmail2">uri</label> <input type="text"
-							class="form-control" id="searchUri" name="uri" placeholder="uri">
+						<label for="exampleInputEmail2">path</label> <input type="text"
+							class="form-control" id="searchUri" name="path" placeholder="path">
 					</div>
 					<input type="hidden" name="page" id="page" value="" />
 					<button type="submit" class="btn btn-primary">查询</button>
@@ -168,7 +168,7 @@
 								<th>名称</th>
 								<th>协议</th>
 								<th>域名</th>
-								<th>URI</th>
+								<th>path</th>
 								<th>方法</th>
 								<th>params</th>
 								<th>bodyParams</th>
@@ -181,7 +181,7 @@
 								<td th:text="${api.name}"></td>
 								<td th:text="${api.protocol}"></td>
 								<td th:text="${api.domain}"></td>
-								<td th:text="${api.uri}"></td>
+								<td th:text="${api.path}"></td>
 								<td th:text="${api.method}"></td>
 								<td th:text="${api.params}"></td>
 								<td th:text="${api.bodyParams}"></td>
@@ -236,8 +236,8 @@
 								placeholder="domain">
 						</div>
 						<div class="form-group">
-							<label for="exampleInputFile">URI</label> <input type="text"
-								class="form-control" id="uri" name="uri" placeholder="uri">
+							<label for="exampleInputFile">path</label> <input type="text"
+								class="form-control" id="path" name="path" placeholder="path">
 						</div>
 						<div class="form-group">
 							<label for="exampleInputPassword1">方法</label> <select type="text"
