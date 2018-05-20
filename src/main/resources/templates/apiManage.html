@@ -14,11 +14,11 @@
 <script type="text/javascript" src="../js/bootstrap-paginator.min.js"></script>
 <link href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css"
 	rel="stylesheet">
-<link href="../css/whole.css"
-	rel="stylesheet">
+<link href="../css/whole.css" rel="stylesheet">
 <script>
 	function edit(id) {
 		$("#saveForm")[0].reset();
+		$("#id").val("");
 		$("#modal").modal("show");
 		if (id != null) {
 			$.get("/api/get/" + id, id, function(data) {
@@ -31,13 +31,32 @@
 				$("#method").val(data.method);
 				$("#params").val(data.params);
 				$("#bodyParams").val(data.bodyParams);
+				$("#validateStr").val(data.validateStr);
+				var header = null;
+				var headers = data.headers;
+				for(var temp in (data.headers)){
+					header = headers[temp];
+					var keyName ="headers["+temp+"].key";
+					var valueName ="headers["+temp+"].value";
+					$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
+							"<input type=\"text\" class=\"form-control\" name="+keyName+" value=\""+header.key+"\"></div>"+
+							"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+" value=\""+header.value+"\"></div>"+
+							"</div>");
+				}
 			});
 		}
 	}
 
 	function save() {
 		//表单数据转换为json字符串
-		var formDataJson = JSON.stringify($('#saveForm').serializeJSON());
+		var tempJson = $('#saveForm').serializeJSON();
+		/*var keyValue1 = {};
+		keyValue1.key="Authorization";
+		keyValue1.value="Basic YWFhOmJiYg==";
+		json.headers[0] = keyValue1;
+		tempJson["headers"]= [];
+		tempJson["headers"][0]=keyValue1;*/
+		var formDataJson = JSON.stringify(tempJson);
 		console.info(formDataJson);
 		$.ajax({
 			url : "/api/save",
@@ -113,6 +132,21 @@
 			}
 		});
 	});
+	
+	function addHeader(){
+		var length =$("#headersDiv .row").length;
+		var keyName ="headers["+length+"].key";
+		var valueName ="headers["+length+"].value";
+		$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
+				"<input type=\"text\" class=\"form-control\" name="+keyName+"></div>"+
+				"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+"></div>"+
+				"</div>");
+	}
+	
+	function deleteHeader(event){
+		var length =$("#headersDiv .row").length;
+		$("#headersDiv .row")[length-1].remove();
+	}
 </script>
 </head>
 <body>
@@ -154,7 +188,8 @@
 					</div>
 					<div class="form-group">
 						<label for="exampleInputEmail2">path</label> <input type="text"
-							class="form-control" id="searchUri" name="path" placeholder="path">
+							class="form-control" id="searchUri" name="path"
+							placeholder="path">
 					</div>
 					<input type="hidden" name="page" id="page" value="" />
 					<button type="submit" class="btn btn-primary">查询</button>
@@ -213,7 +248,7 @@
 					<h4 class="modal-title" id="myModalLabel">编辑</h4>
 				</div>
 				<div class="modal-body">
-					<form id="saveForm">
+					<form id="saveForm" action="/api/save" method="post">
 						<div class="form-group">
 							<input type="hidden" class="form-control" id="id" name="id"
 								placeholder="id">
@@ -248,6 +283,14 @@
 							</select>
 						</div>
 						<div class="form-group">
+							<label>header</label>
+							<button type="button" class="btn btn-primary" onClick="addHeader()">addHeader</button>
+							<button type="button" class="btn btn-primary"
+								        onClick="deleteHeader()">deleteHeader</button>
+							<div id="headersDiv">
+							</div>
+						</div>
+						<div class="form-group">
 							<label for="exampleInputFile">params</label>
 							<textarea class="form-control" id="params" name="params"
 								placeholder="params"></textarea>
@@ -257,10 +300,16 @@
 							<textarea type="text" class="form-control" id="bodyParams"
 								name="bodyParams" placeholder="bodyParams"></textarea>
 						</div>
+						<div class="form-group">
+							<label for="validateStr">校验</label>
+							<textarea type="text" class="form-control" id="validateStr"
+								name="validateStr" placeholder="validateStr"></textarea>
+						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default"
 								data-dismiss="modal">关闭</button>
-							<button type="button" class="btn btn-primary" onclick="save()">保存</button>
+							<!-- <button type="button" class="btn btn-primary" onclick="save()">保存</button> -->
+							<button type="submit" class="btn btn-primary">保存</button>
 						</div>
 					</form>
 				</div>
@@ -272,14 +321,14 @@
 		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
-			    <div class="modal-header">
+				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"
 						aria-hidden="true">×</button>
 					<h4 class="modal-title" id="myModalLabel">测试结果</h4>
 				</div>
 				<div class="modal-body">
 					<div class="form-group">
-						<p id="testResult" ></p>
+						<p id="testResult"></p>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>

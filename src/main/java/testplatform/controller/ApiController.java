@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -47,7 +46,7 @@ public class ApiController {
 	}
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public @ResponseBody Long save(@RequestBody Api api) throws Exception {
+	public String save(Api api) throws Exception {
 		Long id = api.getId();
 		Date date = new Date();
 		if (id == null) {
@@ -60,7 +59,7 @@ public class ApiController {
 			api = apiRepository.saveAndFlush(api);
 		}
 
-		return api.getId();
+		return "redirect:/api/search";
 	}
 
 	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
