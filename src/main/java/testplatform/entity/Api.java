@@ -38,6 +38,7 @@ public class Api extends Base {
 	@OneToMany(cascade=CascadeType.ALL) 
 	@JoinColumn(name="apiId")  
 	private List<Header> headers;
+	private Integer sleep;
 
 	public PROTOCOL getProtocol() {
 		return protocol;
@@ -109,6 +110,14 @@ public class Api extends Base {
 
 	public void setHeaders(List<Header> headers) {
 		this.headers = headers;
+	}
+
+	public Integer getSleep() {
+		return sleep;
+	}
+
+	public void setSleep(Integer sleep) {
+		this.sleep = sleep;
 	}
 
 }

@@ -77,6 +77,9 @@ public class ApiController {
 	public @ResponseBody StepResult test(@PathVariable Long id, Model model) throws Exception {
 		Api api = apiRepository.findById(id).get();
 		StepResult stepResult = ApiExcutor.excutor(api);
+//		if(!Status.SUCCESS.equals(stepResult.getStatus())){
+//			
+//		}
 		return stepResult;
 	}
 }

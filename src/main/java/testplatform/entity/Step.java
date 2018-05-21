@@ -24,9 +24,10 @@ public class Step extends Base {
 	@JoinColumn(name = "stepId")
 	private List<StepResult> stepResultArr;
 	private String validateStr;
-//	@OneToMany(cascade=CascadeType.ALL) 
-//	@JoinColumn(name="stepId")
-//	private List<HeaderEntity> headers;
+	private Integer sleep;
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "stepId")
+	private List<StepHeader> headers;
 
 	public Api getApi() {
 		return api;
@@ -68,12 +69,20 @@ public class Step extends Base {
 		this.validateStr = validateStr;
 	}
 
-//	public List<HeaderEntity> getHeaders() {
-//		return headers;
-//	}
-//
-//	public void setHeaders(List<HeaderEntity> headers) {
-//		this.headers = headers;
-//	}
+	public Integer getSleep() {
+		return sleep;
+	}
+
+	public void setSleep(Integer sleep) {
+		this.sleep = sleep;
+	}
+
+	public List<StepHeader> getHeaders() {
+		return headers;
+	}
+
+	public void setHeaders(List<StepHeader> headers) {
+		this.headers = headers;
+	}
 
 }

@@ -76,11 +76,17 @@
 		$.get("/api/test/" + id, function(data) {
 			console.info(data);
 			$("#testResultModel").modal("show");
-			$("#testResult").text(data.response);
+			$("#testResult").text(data.response+"  "+data.status+"  "+data.reason);
 		});
 	}
 
-	function deleteApi(id) {
+	function deleteConfirm(id) {
+		$("#deleteConfirmModal").modal("show");
+		$("#apiId").val(id);
+	}
+	
+	function deleteApi(){
+		var id = $("#apiId").val();
 		$.get("/api/delete/" + id, id, function(data) {
 			console.info(data);
 			window.location.href = ("/api/search");
@@ -224,7 +230,7 @@
 									th:onclick="'javascript:edit(\''+${api.id}+'\')'">编辑</a> <a
 									id="test" th:onclick="'javascript:test(\''+${api.id}+'\')'">测试</a>
 									<a id="delete"
-									th:onclick="'javascript:deleteApi(\''+${api.id}+'\')'">删除</a></td>
+									th:onclick="'javascript:deleteConfirm(\''+${api.id}+'\')'">删除</a></td>
 							</tr>
 						</tbody>
 					</table>
@@ -337,5 +343,23 @@
 			</div>
 		</div>
 	</div>
+	<div class="modal fade" tabindex="-1" role="dialog" id="deleteConfirmModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">提示</h4>
+      </div>
+      <div class="modal-body">
+        <input id="apiId" type="hidden" />
+        <p>确定要删除吗？</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onClick="deleteApi()">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

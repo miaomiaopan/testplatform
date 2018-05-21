@@ -50,11 +50,12 @@ public class ApiExcutor {
 
 			JsonPath jsonPath = JsonPath.from(response);
 			String value = "";
-			if (expectValue.startsWith("\"")) {
-				value = jsonPath.get(path);
-			} else {
-				value = String.valueOf(jsonPath.getInt(path));
-			}
+//			if (expectValue.startsWith("\"")) {
+//				value = jsonPath.get(path);
+//			} else {
+//				value = String.valueOf(jsonPath.getInt(path));
+//			}
+			value = jsonPath.get(path);
 
 			if (!String.valueOf(value).equals(expectValue)) {
 				stepResult.setReason(validateStr + "：校验不通过");
