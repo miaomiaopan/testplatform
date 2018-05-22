@@ -2,9 +2,14 @@ package testplatform.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import testplatform.entity.Api;
-import testplatform.entity.CaseResult;
 import testplatform.entity.Step;
 import testplatform.entity.TestCase;
 import testplatform.repository.ApiRepository;
@@ -35,14 +39,21 @@ public class TestCaseController {
 	private ApiRepository apiRepository;
 
 	@RequestMapping(value = "/search", method = RequestMethod.GET)
-	public String search(Model model) {
-		List<TestCase> testCaseArr = testCaseRepository.findAll();
-		model.addAttribute("testCaseArr", testCaseArr);
+	public String search(TestCase testCase, Model model, Pageable pageable) {
+		if (pageable.getPageNumber() == 0) {
+			pageable = PageRequest.of(1, 20);
+		}
+		Page<TestCase> result = testCaseRepository.search(pageable, testCase);
+		model.addAttribute("testCaseArr", result.getContent());
+		Map<String, Integer> page = new HashMap<String, Integer>();
+		page.put("currentPage", pageable.getPageNumber());
+		page.put("totalPages", result.getTotalPages());
+		model.addAttribute("page", page);
 		return "caseManage";
 	}
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public @ResponseBody Long save(@RequestBody TestCase testCase) throws Exception {
+	public String save(TestCase testCase) throws Exception {
 		Long id = testCase.getId();
 		Date date = new Date();
 		if (id == null) {
@@ -55,7 +66,7 @@ public class TestCaseController {
 			testCase = testCaseRepository.saveAndFlush(testCase);
 		}
 
-		return testCase.getId();
+		return "redirect:/case/search";
 	}
 
 	@RequestMapping(value = "/test", method = RequestMethod.POST)
@@ -81,17 +92,34 @@ public class TestCaseController {
 
 		return testCase.getId();
 	}
-	
+
 	@RequestMapping(value = "/excute/{id}", method = RequestMethod.GET)
-	public @ResponseBody String excute(@PathVariable Long id) throws Exception{
+	public @ResponseBody String excute(@PathVariable Long id) throws Exception {
 		if (id == null) {
 			throw new Exception("id不能为空");
 		}
 		TestCase testCase = testCaseRepository.getOne(id);
 		testCase = TestCaseExcutor.excutor(testCase);
 		testCaseRepository.save(testCase);
-//		List<CaseResult> caseResultArr = testCase.getCaseResult();
+		// List<CaseResult> caseResultArr = testCase.getCaseResult();
 		return "ok";
+	}
+
+	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
+	public @ResponseBody void delete(@PathVariable Long id, Model model) throws Exception {
+		testCaseRepository.deleteById(id);
+	}
+
+	@RequestMapping(value = "/doImportApi", method = RequestMethod.POST)
+	public @ResponseBody TestCase doImportApi(@RequestBody TestCase entity) throws Exception {
+		TestCase testCase = testCaseRepository.findById(entity.getId()).get();
+		for (Step step : entity.getSteps()) {
+			testCase.getSteps().add(step);
+		}
+
+		testCaseRepository.saveAndFlush(testCase);
+
+		return testCase;
 	}
 
 }

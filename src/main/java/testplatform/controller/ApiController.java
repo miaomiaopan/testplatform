@@ -44,6 +44,22 @@ public class ApiController {
 		model.addAttribute("page", page);
 		return "apiManage";
 	}
+	
+	@RequestMapping(value = "/importApi", method = RequestMethod.GET)
+	public String list(Api api, Model model, Pageable pageable, Long caseId) {
+		if (pageable.getPageNumber() == 0) {
+			pageable = PageRequest.of(1, 20);
+		}
+		Page<Api> result = apiRepository.search(pageable, api);
+		
+		model.addAttribute("apiArr", result.getContent());
+		Map<String, Integer> page = new HashMap<String, Integer>();
+		page.put("currentPage", pageable.getPageNumber());
+		page.put("totalPages", result.getTotalPages());
+		model.addAttribute("page", page);
+		model.addAttribute("caseId", caseId);
+		return "importApi";
+	}
 
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public String save(Api api) throws Exception {

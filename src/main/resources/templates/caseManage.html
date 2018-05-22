@@ -4,15 +4,170 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
 <meta name="description" content="">
 <meta name="author" content="">
-<title>Dashboard Template for Bootstrap</title>
+<title>CaseManage</title>
 <script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="../js/jquery.serializejson.min.js"></script>
 <script type="text/javascript"
 	src="../js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap-paginator.min.js"></script>
 <link href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css"
 	rel="stylesheet">
+<link href="../css/whole.css" rel="stylesheet">
+<script>
+	function edit(id) {
+		$("#saveForm")[0].reset();
+		$("#id").val("");
+		$("#modal").modal("show");
+		if (id != null) {
+			$.get("/api/get/" + id, id, function(data) {
+				console.info(data);
+				$("#id").val(data.id);
+				$("#name").val(data.name);
+				$("#protocol").val(data.protocol);
+				$("#domain").val(data.domain);
+				$("#path").val(data.path);
+				$("#method").val(data.method);
+				$("#params").val(data.params);
+				$("#bodyParams").val(data.bodyParams);
+				$("#validateStr").val(data.validateStr);
+				var header = null;
+				var headers = data.headers;
+				for(var temp in (data.headers)){
+					header = headers[temp];
+					var keyName ="headers["+temp+"].key";
+					var valueName ="headers["+temp+"].value";
+					$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
+							"<input type=\"text\" class=\"form-control\" name="+keyName+" value=\""+header.key+"\"></div>"+
+							"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+" value=\""+header.value+"\"></div>"+
+							"</div>");
+				}
+			});
+		}
+	}
+
+	function save() {
+		//表单数据转换为json字符串
+		var tempJson = $('#saveForm').serializeJSON();
+		/*var keyValue1 = {};
+		keyValue1.key="Authorization";
+		keyValue1.value="Basic YWFhOmJiYg==";
+		json.headers[0] = keyValue1;
+		tempJson["headers"]= [];
+		tempJson["headers"][0]=keyValue1;*/
+		var formDataJson = JSON.stringify(tempJson);
+		console.info(formDataJson);
+		$.ajax({
+			url : "/api/save",
+			type : "POST",
+			datType : "JSON",
+			contentType : "application/json",
+			data : formDataJson,
+			success : function(result) {
+				console.info(result);
+				$("#modal").modal("hide");
+				window.location.href = ("/api/search");
+			}
+		});
+	}
+
+	function test(id) {
+		$.get("/api/test/" + id, function(data) {
+			console.info(data);
+			$("#testResultModel").modal("show");
+			$("#testResult").text(data.response+"  "+data.status+"  "+data.reason);
+		});
+	}
+
+	function deleteConfirm(id) {
+		$("#deleteConfirmModal").modal("show");
+		$("#caseId").val(id);
+	}
+	
+	function deleteCase(){
+		var id = $("#caseId").val();
+		$.get("/case/delete/" + id, id, function(data) {
+			console.info(data);
+			window.location.href = ("/case/search");
+		});
+	}
+
+	function search() {
+		//表单数据转换为json字符串
+		var formDataJson = JSON.stringify($('#searchForm').serializeJSON());
+		console.info(formDataJson);
+		$.ajax({
+			url : "/api/search",
+			type : "GET",
+			datType : "JSON",
+			contentType : "application/json",
+			data : formDataJson,
+			success : function(result) {
+				console.info(result);
+				window.location.href = ("/api/search");
+			}
+		});
+	}
+
+	$(document).ready(function() {
+		$('#pagination').bootstrapPaginator({
+			currentPage : [[${page.currentPage}]],//当前的请求页面。
+			totalPages : [[${page.totalPages}]],//一共多少页。
+			size : "normal",
+			bootstrapMajorVersion : 3,//bootstrap的版本要求。
+			alignment : "right",
+			numberOfPages : 10,//一页列出多少数据。
+			itemTexts : function(type, page, current) {
+				switch (type) {
+				case "first":
+					return "首页";
+				case "prev":
+					return "上一页";
+				case "next":
+					return "下一页";
+				case "last":
+					return "末页";
+				case "page":
+					return page;
+				}
+			},
+			onPageClicked : function(event, originalEvent, type, page){
+				$("#page").val(page);
+				$("#searchForm").submit();
+			}
+		});
+	});
+	
+	function addHeader(){
+		/*var length =$("#headersDiv .row").length;
+		var keyName ="headers["+length+"].key";
+		var valueName ="headers["+length+"].value";
+		$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
+				"<input type=\"text\" class=\"form-control\" name="+keyName+"></div>"+
+				"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+"></div>"+
+				"</div>");*/
+		$("#apiModel").modal("show");
+	}
+	
+	function deleteHeader(event){
+		var length =$("#headersDiv .row").length;
+		$("#headersDiv .row")[length-1].remove();
+	}
+	
+	function importApi(id){
+		/*$("#apiListModal").modal("show");
+		/*$.ajax({
+			url : "/api/list",
+			type : "get",
+			success : function(result) {
+				console.info(result);
+				$("#apiList").html(result);
+			}
+		});*/
+		window.location.href = ("/api/importApi?caseId="+id);
+	}
+</script>
 </head>
 <body>
 	<nav class="navbar navbar-inverse ">
@@ -37,13 +192,201 @@
 		<div class="row">
 			<div class="col-md-2">
 				<ul class="nav nav-pills nav-stacked">
-					<li role="presentation" ><a href="/main">首页</a></li>
+					<li role="presentation"><a href="/main">首页</a></li>
 					<li role="presentation" class="active"><a href="/case/search">用例</a></li>
 					<li role="presentation"><a href="/api/search">接口</a></li>
 				</ul>
 			</div>
 			<div class="col-md-10">
-				<p>caseManage</p>
+				<!-- 搜索表单 -->
+				<form class="form-inline" id="searchForm" action="/case/search"
+					method="get">
+					<div class="form-group">
+						<label for="exampleInputName2">name</label> <input type="text"
+							class="form-control" id="searchName" name="name"
+							placeholder="name">
+					</div>
+					<!-- <div class="form-group">
+						<label for="exampleInputEmail2">path</label> <input type="text"
+							class="form-control" id="searchUri" name="path"
+							placeholder="path">
+					</div> -->
+					<input type="hidden" name="page" id="page" value="" />
+					<button type="submit" class="btn btn-primary">查询</button>
+					<button type="button" class="btn btn-info" onclick="edit()">添加case</button>
+				</form>
+				<div class="table-responsive">
+					<table class="table table-striped table-hover ">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>名称</th>
+								<th>接口</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="testCase : ${testCaseArr}">
+								<td th:text="${testCase.id}"></td>
+								<td th:text="${testCase.name}"></td>
+								<td>
+									<div th:each="step:${testCase.steps}">
+										<input type="hidden" id="apiId" th:value="${step.api.id}" />
+										<div th:text="${step.api.name}"></div>
+									</div>
+								</td>
+								<td><a id="edit"
+									th:onclick="'javascript:edit(\''+${testCase.id}+'\')'">编辑</a> <a
+									id="test"
+									th:onclick="'javascript:test(\''+${testCase.id}+'\')'">测试</a> <a
+									id="delete"
+									th:onclick="'javascript:deleteConfirm(\''+${testCase.id}+'\')'">删除</a>
+									<a id="importApi"
+									th:onclick="'javascript:importApi(\''+${testCase.id}+'\')'">导入接口</a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<!-- 分页 -->
+					<ul id="pagination" class="pagination">
+						<li class="disabled"><a href="#">&laquo;</a></li>
+						<li class="disabled"><a href="#">&raquo;</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">编辑</h4>
+				</div>
+				<div class="modal-body">
+					<form id="saveForm" action="/case/save" method="post">
+						<div class="form-group">
+							<input type="hidden" class="form-control" id="id" name="id"
+								placeholder="id">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputEmail1">名称</label> <input type="text"
+								class="form-control" id="name" name="name" placeholder="name">
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">关闭</button>
+							<!-- <button type="button" class="btn btn-primary" onclick="save()">保存</button> -->
+							<button type="submit" class="btn btn-primary">保存</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="testResultModel" tabindex="-1"
+		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">测试结果</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<p id="testResult"></p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" tabindex="-1" role="dialog"
+		id="deleteConfirmModal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">删除</h4>
+				</div>
+				<div class="modal-body">
+					<input id="caseId" type="hidden" />
+					<p>确定要删除吗？</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary"
+						onClick="deleteCase()">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" tabindex="-1" role="dialog" id="apiListModal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">接口列表</h4>
+				</div>
+				<div class="modal-body" id="apiList">
+					<form class="form-inline" id="searchForm" action="/api/search"
+						method="get">
+						<div class="form-group">
+							<label for="exampleInputName2">name</label> <input type="text"
+								class="form-control" id="searchName" name="name"
+								placeholder="name">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputEmail2">path</label> <input type="text"
+								class="form-control" id="searchUri" name="path"
+								placeholder="path">
+						</div>
+						<input type="hidden" name="page" id="page" value="" />
+						<button type="submit" class="btn btn-primary">查询</button>
+					</form>
+					<div class="table-responsive">
+						<table class="table table-striped table-hover ">
+							<thead>
+								<tr>
+									<th>复选框</th>
+									<th>ID</th>
+									<th>名称</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="api : ${apiArr}">
+									<td>复选框</td>
+									<td th:text="${api.id}"></td>
+									<td th:text="${api.name}"></td>
+								</tr>
+							</tbody>
+						</table>
+						<!-- 分页 -->
+						<ul id="pagination" class="pagination">
+							<li class="disabled"><a href="#">&laquo;</a></li>
+							<li class="disabled"><a href="#">&raquo;</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary"
+						onClick="deleteCase()">确定</button>
+				</div>
 			</div>
 		</div>
 	</div>

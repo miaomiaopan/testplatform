@@ -29,6 +29,13 @@ public class Step extends Base {
 	@JoinColumn(name = "stepId")
 	private List<StepHeader> headers;
 
+	public Step() {
+	}
+
+	public Step(Api api) {
+		this.api = api;
+	}
+
 	public Api getApi() {
 		return api;
 	}
