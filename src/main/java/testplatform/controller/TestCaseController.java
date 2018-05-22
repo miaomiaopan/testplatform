@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import testplatform.entity.Api;
+import testplatform.entity.CaseResult;
 import testplatform.entity.Step;
 import testplatform.entity.TestCase;
 import testplatform.repository.ApiRepository;
 import testplatform.repository.TestCaseRepository;
+import testplatform.util.StepApiConverter;
 import testplatform.util.TestCaseExcutor;
 
 /**
@@ -61,10 +63,44 @@ public class TestCaseController {
 			testCase = testCaseRepository.save(testCase);
 		} else {
 			TestCase temp = testCaseRepository.findById(id).get();
-			testCase.setCreateTime(temp.getCreateTime());
-			testCase.setUpdateTime(date);
-			testCase = testCaseRepository.saveAndFlush(testCase);
+			temp.setName(testCase.getName());
+			testCase = testCaseRepository.saveAndFlush(temp);
 		}
+
+		return "redirect:/case/search";
+	}
+
+	@RequestMapping(value = "/saveStep", method = RequestMethod.POST)
+	public String saveStep(TestCase testCase) throws Exception {
+		Long id = testCase.getId();
+		Step tempStep = testCase.getSteps().get(0);
+		testCase = testCaseRepository.findById(id).get();
+		for (Step step : testCase.getSteps()) {
+			if (step.getId().equals(tempStep.getId())) {
+				step.setParams(tempStep.getParams());
+				step.setBodyParams(tempStep.getBodyParams());
+				step.setSleep(tempStep.getSleep());
+				step.setValidateStr(tempStep.getValidateStr());
+				step.setHeaders(tempStep.getHeaders());
+				step.setUpdateTime(new Date());
+			}
+		}
+		testCase = testCaseRepository.saveAndFlush(testCase);
+
+		return "redirect:/case/search";
+	}
+
+	@RequestMapping(value = "/deleteStep", method = RequestMethod.POST)
+	public String deleteStep(TestCase testCase) throws Exception {
+		Long id = testCase.getId();
+		Step tempStep = testCase.getSteps().get(0);
+		testCase = testCaseRepository.findById(id).get();
+		for (Step step : testCase.getSteps()) {
+			if (step.getId().equals(tempStep.getId())) {
+				// TODO 删除
+			}
+		}
+		testCase = testCaseRepository.saveAndFlush(testCase);
 
 		return "redirect:/case/search";
 	}
@@ -94,15 +130,15 @@ public class TestCaseController {
 	}
 
 	@RequestMapping(value = "/excute/{id}", method = RequestMethod.GET)
-	public @ResponseBody String excute(@PathVariable Long id) throws Exception {
+	public @ResponseBody CaseResult excute(@PathVariable Long id) throws Exception {
 		if (id == null) {
 			throw new Exception("id不能为空");
 		}
 		TestCase testCase = testCaseRepository.getOne(id);
 		testCase = TestCaseExcutor.excutor(testCase);
 		testCaseRepository.save(testCase);
-		// List<CaseResult> caseResultArr = testCase.getCaseResult();
-		return "ok";
+		List<CaseResult> caseResults = testCase.getCaseResult();
+		return caseResults.get(caseResults.size() - 1);
 	}
 
 	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
@@ -113,12 +149,20 @@ public class TestCaseController {
 	@RequestMapping(value = "/doImportApi", method = RequestMethod.POST)
 	public @ResponseBody TestCase doImportApi(@RequestBody TestCase entity) throws Exception {
 		TestCase testCase = testCaseRepository.findById(entity.getId()).get();
+		Api api = null;
 		for (Step step : entity.getSteps()) {
-			testCase.getSteps().add(step);
+			api = apiRepository.findById(step.getApi().getId()).get();
+			testCase.getSteps().add(StepApiConverter.ApiConvertToStep(api));
 		}
 
 		testCaseRepository.saveAndFlush(testCase);
 
+		return testCase;
+	}
+
+	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+	public @ResponseBody TestCase get(@PathVariable Long id, Model model) throws Exception {
+		TestCase testCase = testCaseRepository.findById(id).get();
 		return testCase;
 	}
 

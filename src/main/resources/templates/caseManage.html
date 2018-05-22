@@ -15,47 +15,53 @@
 <link href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css"
 	rel="stylesheet">
 <link href="../css/whole.css" rel="stylesheet">
-<script>
+<script th:inline="javascript">
 	function edit(id) {
 		$("#saveForm")[0].reset();
 		$("#id").val("");
 		$("#modal").modal("show");
 		if (id != null) {
-			$.get("/api/get/" + id, id, function(data) {
+			$.get("/case/get/" + id, id, function(data) {
 				console.info(data);
 				$("#id").val(data.id);
 				$("#name").val(data.name);
-				$("#protocol").val(data.protocol);
-				$("#domain").val(data.domain);
-				$("#path").val(data.path);
-				$("#method").val(data.method);
-				$("#params").val(data.params);
-				$("#bodyParams").val(data.bodyParams);
-				$("#validateStr").val(data.validateStr);
-				var header = null;
-				var headers = data.headers;
-				for(var temp in (data.headers)){
-					header = headers[temp];
-					var keyName ="headers["+temp+"].key";
-					var valueName ="headers["+temp+"].value";
-					$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
-							"<input type=\"text\" class=\"form-control\" name="+keyName+" value=\""+header.key+"\"></div>"+
-							"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+" value=\""+header.value+"\"></div>"+
-							"</div>");
-				}
 			});
+		}
+	}
+	
+	function editStep(caseId,caseIndex,stepId,stepIndex) {
+		$("#stepModal").modal("show");
+		console.info([[${testCaseArr}]]);
+		var testCaseArr = [[${testCaseArr}]];
+		var testCase = testCaseArr[caseIndex];
+		var step = (testCase.steps)[stepIndex];
+		var api = step.api;
+		$("#stepCaseId").val(caseId);
+		$("#stepId").val(stepId);
+		$("#name").val(api.name);
+		$("#protocol").val(api.protocol);
+		$("#domain").val(api.domain);
+		$("#path").val(api.path);
+		$("#method").val(api.method);
+		$("#params").val(step.params);
+		$("#bodyParams").val(step.bodyParams);
+		$("#validateStr").val(step.validateStr);
+		var header = null;
+		var headers = step.headers;
+		for(var temp in headers){
+			header = headers[temp];
+			var keyName ="steps[0].headers["+temp+"].key";
+			var valueName ="steps[0].headers["+temp+"].value";
+			$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
+					"<input type=\"text\" class=\"form-control\" name="+keyName+" value=\""+header.key+"\"></div>"+
+					"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+" value=\""+header.value+"\"></div>"+
+					"</div>");
 		}
 	}
 
 	function save() {
 		//表单数据转换为json字符串
 		var tempJson = $('#saveForm').serializeJSON();
-		/*var keyValue1 = {};
-		keyValue1.key="Authorization";
-		keyValue1.value="Basic YWFhOmJiYg==";
-		json.headers[0] = keyValue1;
-		tempJson["headers"]= [];
-		tempJson["headers"][0]=keyValue1;*/
 		var formDataJson = JSON.stringify(tempJson);
 		console.info(formDataJson);
 		$.ajax({
@@ -72,11 +78,11 @@
 		});
 	}
 
-	function test(id) {
-		$.get("/api/test/" + id, function(data) {
+	function excute(id) {
+		$.get("/case/excute/" + id, function(data) {
 			console.info(data);
 			$("#testResultModel").modal("show");
-			$("#testResult").text(data.response+"  "+data.status+"  "+data.reason);
+			$("#testResult").text(data.status);
 		});
 	}
 
@@ -140,14 +146,13 @@
 	});
 	
 	function addHeader(){
-		/*var length =$("#headersDiv .row").length;
-		var keyName ="headers["+length+"].key";
-		var valueName ="headers["+length+"].value";
+		var length =$("#headersDiv .row").length;
+		var keyName ="steps[0].headers["+length+"].key";
+		var valueName ="steps[0].headers["+length+"].value";
 		$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
 				"<input type=\"text\" class=\"form-control\" name="+keyName+"></div>"+
 				"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+"></div>"+
-				"</div>");*/
-		$("#apiModel").modal("show");
+				"</div>");
 	}
 	
 	function deleteHeader(event){
@@ -226,20 +231,23 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr th:each="testCase : ${testCaseArr}">
+							<tr th:each="testCase, testCaseIter:${testCaseArr}">
 								<td th:text="${testCase.id}"></td>
 								<td th:text="${testCase.name}"></td>
 								<td>
-									<div th:each="step:${testCase.steps}">
+									<div th:each="step, stepIter:${testCase.steps}">
 										<input type="hidden" id="apiId" th:value="${step.api.id}" />
-										<div th:text="${step.api.name}"></div>
+										<div>
+											<a th:text="${step.id}+' '+${step.api.name}"
+												th:href="'javascript:editStep(\''+${testCase.id}+'\',\''+${testCaseIter.index}+'\',\''+${step.id}+'\',\''+${stepIter.index}+'\')'"></a>
+										</div>
 									</div>
 								</td>
 								<td><a id="edit"
 									th:onclick="'javascript:edit(\''+${testCase.id}+'\')'">编辑</a> <a
 									id="test"
-									th:onclick="'javascript:test(\''+${testCase.id}+'\')'">测试</a> <a
-									id="delete"
+									th:onclick="'javascript:excute(\''+${testCase.id}+'\')'">执行</a>
+									<a id="delete"
 									th:onclick="'javascript:deleteConfirm(\''+${testCase.id}+'\')'">删除</a>
 									<a id="importApi"
 									th:onclick="'javascript:importApi(\''+${testCase.id}+'\')'">导入接口</a>
@@ -386,6 +394,88 @@
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
 					<button type="button" class="btn btn-primary"
 						onClick="deleteCase()">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="stepModal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">编辑Step</h4>
+				</div>
+				<div class="modal-body">
+					<form id="saveStepForm" action="/case/saveStep" method="post">
+						<div class="form-group">
+							<input type="hidden" class="form-control" id="stepCaseId" name="id"
+								placeholder="id">
+							<input type="hidden" class="form-control" id="stepId" name="steps[0].id"
+								placeholder="id">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputEmail1">名称</label> <input type="text"
+								disabled="disabled" class="form-control" id="name" name="name"
+								placeholder="name">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputPassword1">协议</label> <select
+								disabled="disabled" type="text" class="form-control"
+								id="protocol" name="protocol" placeholder="protocol">
+								<option value="HTTP">http</option>
+								<option value="HTTPS">https</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">域名</label> <input
+								disabled="disabled" type="text" class="form-control" id="domain"
+								name="domain" placeholder="domain">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">path</label> <input
+								disabled="disabled" type="text" class="form-control" id="path"
+								name="path" placeholder="path">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputPassword1">方法</label> <select
+								disabled="disabled" type="text" class="form-control" id="method"
+								name="method" placeholder="protocol">
+								<option value="POST">post</option>
+								<option value="GET">get</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label>header</label>
+							<button type="button" class="btn btn-primary"
+								onClick="addHeader()">addHeader</button>
+							<button type="button" class="btn btn-primary"
+								onClick="deleteHeader()">deleteHeader</button>
+							<div id="headersDiv"></div>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">params</label>
+							<textarea class="form-control" id="params" name="steps[0].params"
+								placeholder="params"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">bodyParams</label>
+							<textarea type="text" class="form-control" id="bodyParams"
+								name="steps[0].bodyParams" placeholder="bodyParams"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="validateStr">校验</label>
+							<textarea type="text" class="form-control" id="validateStr"
+								name="steps[0].validateStr" placeholder="validateStr"></textarea>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">关闭</button>
+							<!-- <button type="button" class="btn btn-primary" onclick="save()">保存</button> -->
+							<button type="submit" class="btn btn-primary">保存</button>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>

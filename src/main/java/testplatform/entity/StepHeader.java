@@ -14,5 +14,10 @@ import javax.persistence.Entity;
 @Entity
 public class StepHeader extends KeyValue {
 	private static final long serialVersionUID = 1L;
+	public StepHeader(){}
+	
+	public StepHeader(Header header){
+		super(header.getKey(),header.getValue());
+	}
 
 }

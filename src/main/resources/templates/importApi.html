@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+<title>API</title>
+<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="../js/jquery.serializejson.min.js"></script>
+<script type="text/javascript"
+	src="../js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap-paginator.min.js"></script>
+<link href="../js/bootstrap-3.3.7-dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link href="../css/whole.css" rel="stylesheet">
+<script>
+	function edit(id) {
+		$("#saveForm")[0].reset();
+		$("#id").val("");
+		$("#modal").modal("show");
+		if (id != null) {
+			$.get("/api/get/" + id, id, function(data) {
+				console.info(data);
+				$("#id").val(data.id);
+				$("#name").val(data.name);
+				$("#protocol").val(data.protocol);
+				$("#domain").val(data.domain);
+				$("#path").val(data.path);
+				$("#method").val(data.method);
+				$("#params").val(data.params);
+				$("#bodyParams").val(data.bodyParams);
+				$("#validateStr").val(data.validateStr);
+				var header = null;
+				var headers = data.headers;
+				for(var temp in (data.headers)){
+					header = headers[temp];
+					var keyName ="headers["+temp+"].key";
+					var valueName ="headers["+temp+"].value";
+					$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
+							"<input type=\"text\" class=\"form-control\" name="+keyName+" value=\""+header.key+"\"></div>"+
+							"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+" value=\""+header.value+"\"></div>"+
+							"</div>");
+				}
+			});
+		}
+	}
+
+	function save() {
+		//表单数据转换为json字符串
+		var tempJson = $('#saveForm').serializeJSON();
+		/*var keyValue1 = {};
+		keyValue1.key="Authorization";
+		keyValue1.value="Basic YWFhOmJiYg==";
+		json.headers[0] = keyValue1;
+		tempJson["headers"]= [];
+		tempJson["headers"][0]=keyValue1;*/
+		var formDataJson = JSON.stringify(tempJson);
+		console.info(formDataJson);
+		$.ajax({
+			url : "/api/save",
+			type : "POST",
+			datType : "JSON",
+			contentType : "application/json",
+			data : formDataJson,
+			success : function(result) {
+				console.info(result);
+				$("#modal").modal("hide");
+				window.location.href = ("/api/search");
+			}
+		});
+	}
+
+	function test(id) {
+		$.get("/api/test/" + id, function(data) {
+			console.info(data);
+			$("#testResultModel").modal("show");
+			$("#testResult").text(data.response+"  "+data.status+"  "+data.reason);
+		});
+	}
+
+	function deleteConfirm(id) {
+		$("#deleteConfirmModal").modal("show");
+		$("#apiId").val(id);
+	}
+	
+	function deleteApi(){
+		var id = $("#apiId").val();
+		$.get("/api/delete/" + id, id, function(data) {
+			console.info(data);
+			window.location.href = ("/api/search");
+		});
+	}
+
+	function search() {
+		//表单数据转换为json字符串
+		var formDataJson = JSON.stringify($('#searchForm').serializeJSON());
+		console.info(formDataJson);
+		$.ajax({
+			url : "/api/search",
+			type : "GET",
+			datType : "JSON",
+			contentType : "application/json",
+			data : formDataJson,
+			success : function(result) {
+				console.info(result);
+				window.location.href = ("/api/search");
+			}
+		});
+	}
+
+	$(document).ready(function() {
+		$('#pagination').bootstrapPaginator({
+			currentPage : [[${page.currentPage}]],//当前的请求页面。
+			totalPages : [[${page.totalPages}]],//一共多少页。
+			size : "normal",
+			bootstrapMajorVersion : 3,//bootstrap的版本要求。
+			alignment : "right",
+			numberOfPages : 10,//一页列出多少数据。
+			itemTexts : function(type, page, current) {
+				switch (type) {
+				case "first":
+					return "首页";
+				case "prev":
+					return "上一页";
+				case "next":
+					return "下一页";
+				case "last":
+					return "末页";
+				case "page":
+					return page;
+				}
+			},
+			onPageClicked : function(event, originalEvent, type, page){
+				$("#page").val(page);
+				$("#searchForm").submit();
+			}
+		});
+	});
+	
+	function addHeader(){
+		var length =$("#headersDiv .row").length;
+		var keyName ="headers["+length+"].key";
+		var valueName ="headers["+length+"].value";
+		$("#headersDiv").append("<div class=\"row\"><div class=\"col-md-4\">"+
+				"<input type=\"text\" class=\"form-control\" name="+keyName+"></div>"+
+				"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" name="+valueName+"></div>"+
+				"</div>");
+	}
+	
+	function deleteHeader(event){
+		var length =$("#headersDiv .row").length;
+		$("#headersDiv .row")[length-1].remove();
+	}
+	
+	function doImport(){
+		var steps =[];
+		$('input[name="checkBox"]:checked').each(function(){
+			var api = {};
+			var step = {};
+			api["id"]=$(this).val();
+			step["api"]=api;
+			steps.push(step);
+		}); 
+		var caseId = [[${caseId}]];
+		var jsonData = {};
+		jsonData["id"] = caseId;
+		jsonData["steps"]=steps;
+		$.ajax({
+			url : "/case/doImportApi",
+			type : "post",
+			datType : "JSON",
+			contentType : "application/json",
+			data : JSON.stringify(jsonData),
+			success : function(result) {
+				console.info(result);
+				window.location.href = ("/case/search");
+			}
+		});
+	}
+</script>
+</head>
+<body>
+	<nav class="navbar navbar-inverse ">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">API测试平台</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#">Dashboard</a></li>
+					<li><a href="#">Settings</a></li>
+					<li><a href="#">Profile</a></li>
+					<li><a href="#">Help</a></li>
+				</ul>
+				<form class="navbar-form navbar-right">
+					<input type="text" class="form-control" placeholder="Search...">
+				</form>
+			</div>
+		</div>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-2">
+				<ul class="nav nav-pills nav-stacked">
+					<li role="presentation"><a href="/main">首页</a></li>
+					<li role="presentation" class="active"><a href="/case/search">用例</a></li>
+					<li role="presentation" ><a href="/api/search">接口</a></li>
+				</ul>
+			</div>
+			<div class="col-md-10">
+				<!-- 搜索表单 -->
+				<form class="form-inline" id="searchForm" action="/api/importApi"
+					method="get">
+					<div class="form-group">
+						<label for="exampleInputName2">name</label> <input type="text"
+							class="form-control" id="searchName" name="name"
+							placeholder="name">
+					</div>
+					<div class="form-group">
+						<label for="exampleInputEmail2">path</label> <input type="text"
+							class="form-control" id="searchUri" name="path"
+							placeholder="path">
+					</div>
+					<input type="hidden" name="page" id="page" value="" />
+					<input type="hidden" name="caseId" th:value="${caseId}">
+					<button type="submit" class="btn btn-primary">查询</button>
+					<button type="button" class="btn btn-info" onclick="doImport()">确定导入</button>
+				</form>
+				<div class="table-responsive">
+					<table class="table table-striped table-hover ">
+						<thead>
+							<tr>
+							    <td><input type="checkbox"/></td>
+								<th>ID</th>
+								<th>名称</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="api : ${apiArr}">
+							    <td><input type="checkbox" th:value="${api.id}" name="checkBox"/></td>
+								<td th:text="${api.id}"></td>
+								<td th:text="${api.name}"></td>
+							</tr>
+						</tbody>
+					</table>
+					<!-- 分页 -->
+					<ul id="pagination" class="pagination">
+						<li class="disabled"><a href="#">&laquo;</a></li>
+						<li class="disabled"><a href="#">&raquo;</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="modal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">编辑</h4>
+				</div>
+				<div class="modal-body">
+					<form id="saveForm" action="/api/save" method="post">
+						<div class="form-group">
+							<input type="hidden" class="form-control" id="id" name="id"
+								placeholder="id">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputEmail1">名称</label> <input type="text"
+								class="form-control" id="name" name="name" placeholder="name">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputPassword1">协议</label> <select type="text"
+								class="form-control" id="protocol" name="protocol"
+								placeholder="protocol">
+								<option value="HTTP">http</option>
+								<option value="HTTPS">https</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">域名</label> <input type="text"
+								class="form-control" id="domain" name="domain"
+								placeholder="domain">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">path</label> <input type="text"
+								class="form-control" id="path" name="path" placeholder="path">
+						</div>
+						<div class="form-group">
+							<label for="exampleInputPassword1">方法</label> <select type="text"
+								class="form-control" id="method" name="method"
+								placeholder="protocol">
+								<option value="POST">post</option>
+								<option value="GET">get</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label>header</label>
+							<button type="button" class="btn btn-primary" onClick="addHeader()">addHeader</button>
+							<button type="button" class="btn btn-primary"
+								        onClick="deleteHeader()">deleteHeader</button>
+							<div id="headersDiv">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">params</label>
+							<textarea class="form-control" id="params" name="params"
+								placeholder="params"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">bodyParams</label>
+							<textarea type="text" class="form-control" id="bodyParams"
+								name="bodyParams" placeholder="bodyParams"></textarea>
+						</div>
+						<div class="form-group">
+							<label for="validateStr">校验</label>
+							<textarea type="text" class="form-control" id="validateStr"
+								name="validateStr" placeholder="validateStr"></textarea>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">关闭</button>
+							<!-- <button type="button" class="btn btn-primary" onclick="save()">保存</button> -->
+							<button type="submit" class="btn btn-primary">保存</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="testResultModel" tabindex="-1"
+		role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">测试结果</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<p id="testResult"></p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" tabindex="-1" role="dialog" id="deleteConfirmModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">删除</h4>
+      </div>
+      <div class="modal-body">
+        <input id="apiId" type="hidden" />
+        <p>确定要删除吗？</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onClick="deleteApi()">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
