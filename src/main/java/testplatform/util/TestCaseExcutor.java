@@ -28,13 +28,12 @@ public class TestCaseExcutor {
 				if (value.startsWith("{{") && value.endsWith("}}")) {
 					resolveEntity = stringConvertToResolveEntity(value);
 					// 从step的response中获取需要的值，替换value
-					Long apiId = resolveEntity.getApiId();
+					Long stepId = resolveEntity.getStepId();
 					TYPE type = resolveEntity.getType();
 					if (type.equals(TYPE.BODY)) {
 						String path = resolveEntity.getPath();
 						for (Step tempStep : stepArr) {
-							Api tempApi = tempStep.getApi();
-							if (tempApi.getId() == apiId) {
+							if(tempStep.getId() == stepId){
 								List<StepResult> stepResultArr = tempStep.getStepResultArr();
 								StepResult stepResult = stepResultArr.get(stepResultArr.size() - 1);
 								String tmepResponse = stepResult.getResponse();
@@ -94,7 +93,7 @@ public class TestCaseExcutor {
 		ResolveEntity resolveEntity = new ResolveEntity();
 		param = param.substring(2, param.length() - 2);
 		String[] tempArr = param.split("\\.");
-		resolveEntity.setApiId(Long.valueOf(tempArr[0]));
+		resolveEntity.setStepId(Long.valueOf(tempArr[0]));
 		resolveEntity.setType(TYPE.getByName(tempArr[1]));
 		String path = "";
 		int length = tempArr.length;

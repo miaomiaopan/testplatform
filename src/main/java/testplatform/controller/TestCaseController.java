@@ -91,13 +91,15 @@ public class TestCaseController {
 	}
 
 	@RequestMapping(value = "/deleteStep", method = RequestMethod.POST)
-	public String deleteStep(TestCase testCase) throws Exception {
+	public String deleteStep(@RequestBody TestCase testCase) throws Exception {
 		Long id = testCase.getId();
 		Step tempStep = testCase.getSteps().get(0);
 		testCase = testCaseRepository.findById(id).get();
-		for (Step step : testCase.getSteps()) {
+		List<Step> steps = testCase.getSteps();
+		for (Step step : steps) {
 			if (step.getId().equals(tempStep.getId())) {
-				// TODO 删除
+				steps.remove(step);
+				break;
 			}
 		}
 		testCase = testCaseRepository.saveAndFlush(testCase);
@@ -159,7 +161,7 @@ public class TestCaseController {
 
 		return testCase;
 	}
-
+	
 	@RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
 	public @ResponseBody TestCase get(@PathVariable Long id, Model model) throws Exception {
 		TestCase testCase = testCaseRepository.findById(id).get();

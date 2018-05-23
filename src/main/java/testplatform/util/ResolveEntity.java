@@ -2,17 +2,9 @@ package testplatform.util;
 
 public class ResolveEntity {
 
-	private Long apiId;
+	private Long stepId;
 	private TYPE type;
 	private String path;
-
-	public Long getApiId() {
-		return apiId;
-	}
-
-	public void setApiId(Long apiId) {
-		this.apiId = apiId;
-	}
 
 	public TYPE getType() {
 		return type;
@@ -30,4 +22,12 @@ public class ResolveEntity {
 		this.path = path;
 	}
 
+	public Long getStepId() {
+		return stepId;
+	}
+
+	public void setStepId(Long stepId) {
+		this.stepId = stepId;
+	}
+	
 }

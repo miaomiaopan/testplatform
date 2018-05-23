@@ -29,6 +29,24 @@
 		}
 	}
 	
+	function deleteStep(caseId, stepId){
+		var testCase = {"id":caseId,
+				"steps":[{"id":stepId}
+					]};
+		$.ajax({
+			url : "/case/deleteStep",
+			type : "POST",
+			datType : "JSON",
+			contentType : "application/json",
+			data : JSON.stringify(testCase),
+			success : function(result) {
+				console.info(result);
+				$("#modal").modal("hide");
+				window.location.href = ("/case/search");
+			}
+		});
+	}
+	
 	function editStep(caseId,caseIndex,stepId,stepIndex) {
 		$("#stepModal").modal("show");
 		console.info([[${testCaseArr}]]);
@@ -161,15 +179,6 @@
 	}
 	
 	function importApi(id){
-		/*$("#apiListModal").modal("show");
-		/*$.ajax({
-			url : "/api/list",
-			type : "get",
-			success : function(result) {
-				console.info(result);
-				$("#apiList").html(result);
-			}
-		});*/
 		window.location.href = ("/api/importApi?caseId="+id);
 	}
 </script>
@@ -240,6 +249,8 @@
 										<div>
 											<a th:text="${step.id}+' '+${step.api.name}"
 												th:href="'javascript:editStep(\''+${testCase.id}+'\',\''+${testCaseIter.index}+'\',\''+${step.id}+'\',\''+${stepIter.index}+'\')'"></a>
+											<a
+												th:href="'javascript:deleteStep(\''+${testCase.id}+'\',\''+${step.id}+'\')'">删除</a>
 										</div>
 									</div>
 								</td>
@@ -410,9 +421,9 @@
 				<div class="modal-body">
 					<form id="saveStepForm" action="/case/saveStep" method="post">
 						<div class="form-group">
-							<input type="hidden" class="form-control" id="stepCaseId" name="id"
-								placeholder="id">
-							<input type="hidden" class="form-control" id="stepId" name="steps[0].id"
+							<input type="hidden" class="form-control" id="stepCaseId"
+								name="id" placeholder="id"> <input type="hidden"
+								class="form-control" id="stepId" name="steps[0].id"
 								placeholder="id">
 						</div>
 						<div class="form-group">
