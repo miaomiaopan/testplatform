@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN"
+xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -283,7 +286,7 @@
 						<div class="form-group">
 							<label for="exampleInputPassword1">方法</label> <select type="text"
 								class="form-control" id="method" name="method"
-								placeholder="protocol">
+								>
 								<option value="POST">post</option>
 								<option value="GET">get</option>
 							</select>
