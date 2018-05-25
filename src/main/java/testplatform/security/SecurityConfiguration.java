@@ -14,18 +14,18 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-	
+
 	@Autowired
 	private MyUserDetailsService myUserDetailsService;
-	
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().formLogin().loginPage("/login").defaultSuccessUrl("/index").permitAll().and()
-				//静态资源都可以访问
-		        .authorizeRequests().antMatchers("/css/**","/js/**").permitAll()
-				.anyRequest().authenticated().and().logout().permitAll().and().logout()
-				.logoutSuccessUrl("/login").permitAll()
-				.and().rememberMe().userDetailsService(myUserDetailsService);
+		http.csrf().disable().formLogin().loginPage("/login").failureUrl("/login?error=true")
+				.defaultSuccessUrl("/index").permitAll().and()
+				// 静态资源都可以访问
+				.authorizeRequests().antMatchers("/css/**", "/js/**").permitAll().anyRequest().authenticated().and()
+				.logout().permitAll().and().logout().logoutSuccessUrl("/login").permitAll().and().rememberMe()
+				.userDetailsService(myUserDetailsService);
 	}
 
 }
