@@ -1,6 +1,7 @@
-package testplatform.entity;
+package testplatform.security;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
  * @author panmiaomiao
@@ -8,8 +9,8 @@ import javax.persistence.Entity;
  * @date 2018年5月7日
  */
 @Entity
-public class User extends Base {
-	private static final long serialVersionUID = 1L;
+public class User {
+	@Id
 	private String username;
 	private String password;
 

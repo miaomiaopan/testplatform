@@ -31,7 +31,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		testplatform.entity.User temp = userRepository.getByUsername(username);
+		testplatform.security.User temp = userRepository.getByUsername(username);
 		if(temp == null){
 			return null;
 		}
