@@ -2,7 +2,7 @@ package testplatform.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import testplatform.security.User;
+import testplatform.entity.User;
 
 /**
  * @author panmiaomiao

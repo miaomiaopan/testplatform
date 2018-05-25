@@ -1,7 +1,10 @@
-package testplatform.security;
+package testplatform.entity;
+
+import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
 
 /**
  * @author panmiaomiao
@@ -9,10 +12,12 @@ import javax.persistence.Id;
  * @date 2018年5月7日
  */
 @Entity
-public class User {
-	@Id
+public class User extends Base{
+	private static final long serialVersionUID = 1L;
 	private String username;
 	private String password;
+	@ManyToMany(fetch=FetchType.EAGER)
+	private List<Role> roles;
 
 	public String getPassword() {
 		return password;
@@ -30,4 +35,12 @@ public class User {
 		this.username = username;
 	}
 
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
+	}
+	
 }

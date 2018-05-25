@@ -3,10 +3,10 @@
  */
 package testplatform.security;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import testplatform.entity.Role;
 import testplatform.repository.UserRepository;
 
 /**
@@ -24,20 +25,18 @@ import testplatform.repository.UserRepository;
 @Component
 public class MyUserDetailsService implements UserDetailsService {
 	@Autowired
-	private PasswordEncoder passwordEncoder;
-	
-	@Autowired
 	private UserRepository userRepository;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		testplatform.security.User temp = userRepository.getByUsername(username);
-		if(temp == null){
-			return null;
+		testplatform.entity.User temp = userRepository.getByUsername(username);
+		if (temp == null) {
+			throw new UsernameNotFoundException("用户不存在");
 		}
-		String password = passwordEncoder.encode(temp.getPassword());
-		User user = new User(username, password, AuthorityUtils.commaSeparatedStringToAuthorityList("admin"));
-		return user;
+
+		List<Role> roles = temp.getRoles();
+
+		return new MyUserDetails(temp, roles);
 	}
 
 	@Bean
