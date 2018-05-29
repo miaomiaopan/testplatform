@@ -32,7 +32,7 @@ xmlns="http://www.w3.org/1999/xhtml"
 				$("#domain").val(data.domain);
 				$("#path").val(data.path);
 				$("#method").val(data.method);
-				$("#params").val(data.params);
+				$("#queryParams").val(data.queryParams);
 				$("#bodyParams").val(data.bodyParams);
 				$("#validateStr").val(data.validateStr);
 				var header = null;
@@ -311,9 +311,9 @@ xmlns="http://www.w3.org/1999/xhtml"
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="exampleInputFile">params</label>
-							<textarea class="form-control" id="params" name="params"
-								placeholder="params"></textarea>
+							<label for="exampleInputFile">queryParams</label>
+							<textarea class="form-control" id="queryParams" name="queryParams"
+								placeholder="queryParams"></textarea>
 						</div>
 						<div class="form-group">
 							<label for="exampleInputFile">bodyParams</label>

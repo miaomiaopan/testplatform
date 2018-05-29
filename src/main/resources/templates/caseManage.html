@@ -64,7 +64,7 @@ xmlns="http://www.w3.org/1999/xhtml"
 		$("#domain").val(api.domain);
 		$("#path").val(api.path);
 		$("#method").val(api.method);
-		$("#params").val(step.params);
+		$("#queryParams").val(step.queryParams);
 		$("#bodyParams").val(step.bodyParams);
 		$("#validateStr").val(step.validateStr);
 		var header = null;
@@ -470,9 +470,9 @@ xmlns="http://www.w3.org/1999/xhtml"
 							<div id="headersDiv"></div>
 						</div>
 						<div class="form-group">
-							<label for="exampleInputFile">params</label>
-							<textarea class="form-control" id="params" name="steps[0].params"
-								placeholder="params"></textarea>
+							<label for="exampleInputFile">queryParams</label>
+							<textarea class="form-control" id="queryParams" name="steps[0].queryParams"
+								placeholder="queryParams"></textarea>
 						</div>
 						<div class="form-group">
 							<label for="exampleInputFile">bodyParams</label>

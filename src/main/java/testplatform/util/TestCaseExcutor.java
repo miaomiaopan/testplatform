@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.restassured.path.json.JsonPath;
 import testplatform.entity.Api;
 import testplatform.entity.CaseResult;
 import testplatform.entity.Step;
+import testplatform.entity.StepHeader;
 import testplatform.entity.StepResult;
 import testplatform.entity.TestCase;
 
@@ -19,37 +22,31 @@ public class TestCaseExcutor {
 		CaseResult caseResult = new CaseResult();
 		for (Step step : stepArr) {
 			Api api = step.getApi();
-			queryMap = stringConvertToMap(step.getParams());
-			Set<String> keySet = queryMap.keySet();
-			String value = null;
-			for (String key : keySet) {
-				value = queryMap.get(key);
-				ResolveEntity resolveEntity = null;
-				if (value.startsWith("{{") && value.endsWith("}}")) {
-					resolveEntity = stringConvertToResolveEntity(value);
-					// 从step的response中获取需要的值，替换value
-					Long stepId = resolveEntity.getStepId();
-					TYPE type = resolveEntity.getType();
-					if (type.equals(TYPE.BODY)) {
-						String path = resolveEntity.getPath();
-						for (Step tempStep : stepArr) {
-							if(tempStep.getId() == stepId){
-								List<StepResult> stepResultArr = tempStep.getStepResultArr();
-								StepResult stepResult = stepResultArr.get(stepResultArr.size() - 1);
-								String tmepResponse = stepResult.getResponse();
-								String tempVar = JsonPath.from(tmepResponse).getString(path);
-								// 替换变量值
-								queryMap.put(key, tempVar);
-								break;
-							}
-						}
+			String queryParams = step.getQueryParams();
+			if (StringUtils.isNotEmpty(queryParams)) {
+				queryMap = stringConvertToMap(step.getQueryParams());
+				Set<String> keySet = queryMap.keySet();
+				String value = null;
+				for (String key : keySet) {
+					value = queryMap.get(key);
+					if (isVariable(value)) {
+						queryMap.put(key, getParams(value, stepArr));
 					}
 				}
+				// 替换后的query参数重新赋值
+				api.setQueryParams(mapConvertToString(queryMap));
 			}
+
+			List<StepHeader> stepHeader = step.getHeaders();
+			for (StepHeader header : stepHeader) {
+				if (isVariable(header.getKey())) {
+					header.setValue(getParams(header.getValue(), stepArr));
+				}
+			}
+
 			api.setBodyParams(step.getBodyParams());
 			api.setValidateStr(step.getValidateStr());
-			// 替换后的query参数重新赋值
-			api.setParams(mapConvertToString(queryMap));
+			api.setHeaders(StepApiConverter.transToHeader(step.getHeaders()));
 			StepResult stepResult = ApiExcutor.excutor(api);
 			step.getStepResultArr().add(stepResult);
 			if (stepResult.getStatus().equals(STATUS.FAIL)) {
@@ -64,6 +61,45 @@ public class TestCaseExcutor {
 
 		testCase.getCaseResult().add(caseResult);
 		return testCase;
+	}
+
+	public static String getParams(String route, List<Step> stepArr) throws Exception {
+		String tempVar = "";
+		ResolveEntity resolveEntity = stringConvertToResolveEntity(route);
+		// 从step的response中获取需要的值，替换value
+		Long stepId = resolveEntity.getStepId();
+		TYPE type = resolveEntity.getType();
+		// 从body中获取参数
+		if (type.equals(TYPE.BODY)) {
+			String path = resolveEntity.getPath();
+			for (Step tempStep : stepArr) {
+				if (tempStep.getId() == stepId) {
+					List<StepResult> stepResultArr = tempStep.getStepResultArr();
+					StepResult stepResult = stepResultArr.get(stepResultArr.size() - 1);
+					String tmepResponse = stepResult.getResponse();
+					tempVar = JsonPath.from(tmepResponse).getString(path);
+					break;
+				}
+			}
+		}
+
+		// 从header中获取参数
+		if (type.equals(TYPE.HEADER)) {
+			String path = resolveEntity.getPath();
+			for (Step tempStep : stepArr) {
+				if (tempStep.getId() == stepId) {
+					List<StepHeader> headers = tempStep.getHeaders();
+					for (StepHeader header : headers) {
+						if (header.getKey().equals(path)) {
+							tempVar = header.getValue();
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return tempVar;
 	}
 
 	public static Map<String, String> stringConvertToMap(String queryParams) {
@@ -103,5 +139,13 @@ public class TestCaseExcutor {
 		resolveEntity.setPath(path.substring(0, path.length() - 1));
 
 		return resolveEntity;
+	}
+
+	public static boolean isVariable(String param) {
+		if (param.startsWith("{{") && param.endsWith("}}")) {
+			return true;
+		}
+
+		return false;
 	}
 }

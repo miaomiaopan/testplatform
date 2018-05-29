@@ -30,13 +30,14 @@ public class Api extends Base {
 	// 域名
 	private String domain;
 	private String path;
-	private String params;
+	// query params
+	private String queryParams;
 	// TODO 扩展body参数
 	private String bodyParams;
 	private METHOD method;
 	private String validateStr;
-	@OneToMany(cascade=CascadeType.ALL) 
-	@JoinColumn(name="apiId")  
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "apiId")
 	private List<Header> headers;
 	private Integer sleep;
 
@@ -64,12 +65,12 @@ public class Api extends Base {
 		this.path = path;
 	}
 
-	public String getParams() {
-		return params;
+	public String getQueryParams() {
+		return queryParams;
 	}
 
-	public void setParams(String params) {
-		this.params = params;
+	public void setQueryParams(String queryParams) {
+		this.queryParams = queryParams;
 	}
 
 	public String getBodyParams() {

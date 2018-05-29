@@ -77,7 +77,7 @@ public class TestCaseController {
 		testCase = testCaseRepository.findById(id).get();
 		for (Step step : testCase.getSteps()) {
 			if (step.getId().equals(tempStep.getId())) {
-				step.setParams(tempStep.getParams());
+				step.setQueryParams(tempStep.getQueryParams());
 				step.setBodyParams(tempStep.getBodyParams());
 				step.setSleep(tempStep.getSleep());
 				step.setValidateStr(tempStep.getValidateStr());
@@ -115,12 +115,12 @@ public class TestCaseController {
 		List<Step> stepArr = new ArrayList<Step>();
 		Step step1 = new Step();
 		step1.setApi(api1);
-		step1.setParams("wd=step1");
+		step1.setQueryParams("wd=step1");
 		step1.setCreateTime(new Date());
 		stepArr.add(step1);
 		Step step2 = new Step();
 		step2.setApi(api2);
-		step2.setParams("wd=step2");
+		step2.setQueryParams("wd=step2");
 		step2.setCreateTime(new Date());
 		stepArr.add(step2);
 		testCase.setCreateTime(new Date());

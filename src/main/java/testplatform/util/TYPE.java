@@ -1,7 +1,7 @@
 package testplatform.util;
 
 public enum TYPE {
-	HEADER("header"), BODY("body");
+	HEADER("header"), BODY("body"), QUERYPARAMS("queryParams");
 
 	private String name;
 

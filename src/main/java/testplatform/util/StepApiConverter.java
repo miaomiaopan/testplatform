@@ -20,7 +20,7 @@ public class StepApiConverter {
 	public static Step ApiConvertToStep(Api api) {
 		Step step = new Step();
 		step.setApi(api);
-		step.setParams(api.getParams());
+		step.setQueryParams(api.getQueryParams());
 		step.setBodyParams(api.getBodyParams());
 		List<StepHeader> stepHeaders = new ArrayList<StepHeader>();
 		for (Header header : api.getHeaders()) {
@@ -30,5 +30,23 @@ public class StepApiConverter {
 		step.setHeaders(stepHeaders);
 		step.setSleep(api.getSleep());
 		return step;
+	}
+	
+	public static List<StepHeader> transToStepHeader(List<Header> headers){
+		List<StepHeader> stepHeaders = new ArrayList<StepHeader>();
+		for (Header header : headers) {
+			stepHeaders.add(new StepHeader(header));
+		}
+		
+		return stepHeaders;
+	}
+	
+	public static List<Header> transToHeader(List<StepHeader> stepHeaders){
+		List<Header> headers = new ArrayList<Header>();
+		for (StepHeader header : stepHeaders) {
+			headers.add(new Header(header));
+		}
+		
+		return headers;
 	}
 }

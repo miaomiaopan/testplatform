@@ -18,7 +18,7 @@ public class Step extends Base {
 	private static final long serialVersionUID = 1L;
 	@ManyToOne
 	private Api api;
-	private String params;
+	private String queryParams;
 	private String bodyParams;
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "stepId")
@@ -44,12 +44,12 @@ public class Step extends Base {
 		this.api = api;
 	}
 
-	public String getParams() {
-		return params;
+	public String getQueryParams() {
+		return queryParams;
 	}
 
-	public void setParams(String params) {
-		this.params = params;
+	public void setQueryParams(String queryParams) {
+		this.queryParams = queryParams;
 	}
 
 	public String getBodyParams() {

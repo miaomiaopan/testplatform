@@ -24,9 +24,9 @@ public class ApiExcutor {
 		}
 
 		url += "://" + api.getDomain() + api.getPath();
-		String params = api.getParams();
+		String params = api.getQueryParams();
 		if (StringUtils.isNotEmpty(params)) {
-			url += "?" + api.getParams();
+			url += "?" + api.getQueryParams();
 		}
 
 		METHOD method = api.getMethod();

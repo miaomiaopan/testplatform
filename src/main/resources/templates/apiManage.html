@@ -32,7 +32,7 @@ xmlns="http://www.w3.org/1999/xhtml"
 				$("#domain").val(data.domain);
 				$("#path").val(data.path);
 				$("#method").val(data.method);
-				$("#params").val(data.params);
+				$("#queryParams").val(data.queryParams);
 				$("#bodyParams").val(data.bodyParams);
 				$("#validateStr").val(data.validateStr);
 				var header = null;
@@ -215,7 +215,7 @@ xmlns="http://www.w3.org/1999/xhtml"
 								<th>域名</th>
 								<th>path</th>
 								<th>方法</th>
-								<th>params</th>
+								<th>queryParams</th>
 								<th>bodyParams</th>
 								<th>操作</th>
 							</tr>
@@ -228,7 +228,7 @@ xmlns="http://www.w3.org/1999/xhtml"
 								<td th:text="${api.domain}"></td>
 								<td th:text="${api.path}"></td>
 								<td th:text="${api.method}"></td>
-								<td th:text="${api.params}"></td>
+								<td th:text="${api.queryParams}"></td>
 								<td th:text="${api.bodyParams}"></td>
 								<td><a id="edit"
 									th:onclick="'javascript:edit(\''+${api.id}+'\')'">编辑</a> <a
@@ -301,9 +301,9 @@ xmlns="http://www.w3.org/1999/xhtml"
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="exampleInputFile">params</label>
-							<textarea class="form-control" id="params" name="params"
-								placeholder="params"></textarea>
+							<label for="exampleInputFile">queryParams</label>
+							<textarea class="form-control" id="queryParams" name="queryParams"
+								placeholder="queryParams"></textarea>
 						</div>
 						<div class="form-group">
 							<label for="exampleInputFile">bodyParams</label>
