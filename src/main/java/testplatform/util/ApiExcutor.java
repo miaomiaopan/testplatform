@@ -39,7 +39,7 @@ public class ApiExcutor {
 			response = HttpUtil.post(url, api.getBodyParams(), transHeaders(headers));
 		}
 
-		// TODO添加验证 先实现=验证
+		// TODO 添加验证 先实现=验证
 		String validateStr = api.getValidateStr();
 		StepResult stepResult = new StepResult();
 		stepResult.setResponse(response);
@@ -50,12 +50,11 @@ public class ApiExcutor {
 
 			JsonPath jsonPath = JsonPath.from(response);
 			String value = "";
-//			if (expectValue.startsWith("\"")) {
-//				value = jsonPath.get(path);
-//			} else {
-//				value = String.valueOf(jsonPath.getInt(path));
-//			}
-			value = jsonPath.get(path);
+			if (expectValue.startsWith("\"")) {
+				value = jsonPath.getString(path);
+			} else {
+				value = String.valueOf(jsonPath.getInt(path));
+			}
 
 			if (!String.valueOf(value).equals(expectValue)) {
 				stepResult.setReason(validateStr + "：校验不通过");

@@ -38,6 +38,7 @@ xmlns="http://www.w3.org/1999/xhtml"
 				var header = null;
 				var headers = data.headers;
 				for(var temp in (data.headers)){
+					$("#headersDiv").empty();
 					header = headers[temp];
 					var keyName ="headers["+temp+"].key";
 					var valueName ="headers["+temp+"].value";

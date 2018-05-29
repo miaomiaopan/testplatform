@@ -70,6 +70,7 @@ xmlns="http://www.w3.org/1999/xhtml"
 		var header = null;
 		var headers = step.headers;
 		for(var temp in headers){
+			$("#headersDiv").empty();
 			header = headers[temp];
 			var keyName ="steps[0].headers["+temp+"].key";
 			var valueName ="steps[0].headers["+temp+"].value";
